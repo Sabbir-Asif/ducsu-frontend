@@ -9,7 +9,6 @@ interface Candidate {
   _id: string;
   ballotNumber: string;
   name: string;
-  ballotName: string;
   postalNumber: string | null;
   registrationNumber: string;
   department: string;
@@ -18,6 +17,7 @@ interface Candidate {
   photo: string | null;
   createdAt: string;
   updatedAt: string;
+  Category: string;
   __v: number;
 }
 
@@ -90,7 +90,6 @@ export default function CandidateListPage() {
         _id: candidate._id,
         ballotNumber: candidate.ballotNumber,
         name: candidate.name,
-        ballotName: candidate.ballotName,
         registrationNumber: candidate.registrationNumber,
         department: candidate.department,
         hall: candidate.hall,
@@ -126,18 +125,40 @@ export default function CandidateListPage() {
   const handleFormSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+      console.log('Form values:', values);
+      let hasPhoto = Array.isArray(values.photo) && values.photo.length > 0 && values.photo[0].originFileObj;
+      console.log('Photo field:', values.photo, 'Has photo:', hasPhoto);
+      let body: string | FormData;
+      let headers: Record<string, string> = {};
+      if (hasPhoto) {
+        const formData = new FormData();
+        Object.keys(values).forEach(key => {
+          if (key === 'photo' && Array.isArray(values.photo) && values.photo.length > 0) {
+            const fileObj = values.photo[0].originFileObj;
+            formData.append('photo', fileObj);
+            console.log('Appending photo to FormData:', fileObj);
+          } else if (values[key] !== undefined && values[key] !== null && key !== 'photo') {
+            formData.append(key, values[key]);
+          }
+        });
+        body = formData;
+        for (let pair of formData.entries()) {
+          console.log('FormData entry:', pair[0], pair[1]);
+        }
+      } else {
+        body = JSON.stringify(values);
+        headers['Content-Type'] = 'application/json';
+      }
       if (formMode === 'add') {
+        console.log('Sending request to add candidate:', { method: 'POST', headers, body });
         const response = await fetch('http://localhost:4000/api/users', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
+          headers,
+          body,
         });
-        
+        console.log('Add candidate response status:', response.status);
         const result = await response.json();
-        
+        console.log('Add candidate response JSON:', result);
         if (result.success) {
           message.success('Candidate added successfully.');
           setIsModalVisible(false);
@@ -147,16 +168,15 @@ export default function CandidateListPage() {
           message.error('Failed to add candidate');
         }
       } else {
+        console.log('Sending request to update candidate:', { method: 'PUT', headers, body });
         const response = await fetch(`http://localhost:4000/api/users/${values._id}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
+          headers,
+          body,
         });
-        
+        console.log('Update candidate response status:', response.status);
         const result = await response.json();
-        
+        console.log('Update candidate response JSON:', result);
         if (result.success) {
           message.success('Candidate updated successfully.');
           setIsModalVisible(false);

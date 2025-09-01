@@ -6,7 +6,6 @@ interface Candidate {
   _id: string;
   ballotNumber: string;
   name: string;
-  ballotName: string;
   postalNumber: string | null;
   registrationNumber: string;
   department: string;
@@ -15,6 +14,7 @@ interface Candidate {
   photo: string | null;
   createdAt: string;
   updatedAt: string;
+  Category: string;
   __v: number;
   key: string;
 }

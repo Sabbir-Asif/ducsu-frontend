@@ -84,13 +84,6 @@ const CandidateFormModal: React.FC<CandidateFormModalProps> = ({
           <Input />
         </Form.Item>
         <Form.Item 
-          name="ballotName" 
-          label="Ballot Name" 
-          rules={[{ required: true, message: 'Please enter ballot name' }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item 
           name="registrationNumber" 
           label="Registration Number" 
           rules={[{ required: true, message: 'Please enter registration number' }]}
